@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Semi Vannes">
+<meta name="theme-color" content="#0a0f1a">
+<title>Semi-Marathon Vannes</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1a;
+    --bg2: #0d1421;
+    --bg3: #111827;
+    --border: rgba(255,255,255,0.07);
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --soft: #94a3b8;
+    --green: #4ade80;
+    --blue: #60a5fa;
+    --orange: #fb923c;
+    --pink: #f472b6;
+    --yellow: #fbbf24;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --purple2: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { font-size: 15px; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(160deg, #0f2027 0%, #1a1a2e 60%, #16213e 100%);
+    border-bottom: 1px solid rgba(96,165,250,0.25);
+    padding: 48px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 50% -20%, rgba(96,165,250,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--blue);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(22px, 6vw, 34px);
+    font-weight: 400;
+    background: linear-gradient(100deg, #e2e8f0 0%, #60a5fa 55%, #e2e8f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: var(--soft);
+    margin-bottom: 20px;
+  }
+  .header-sub strong { color: var(--yellow); }
+  .stats {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .stat {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 8px 14px;
+    text-align: center;
+    min-width: 64px;
+  }
+  .stat-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--blue);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .tab {
+    flex: 1;
+    padding: 13px 8px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .tab.active {
+    color: var(--blue);
+    border-bottom-color: var(--blue);
+  }
+
+  /* PHASE BADGES */
+  .phase-strip {
+    display: flex;
+    gap: 6px;
+    padding: 14px 16px 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .phase-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+
+  /* WEEKS */
+  .weeks { padding: 0 12px; max-width: 680px; margin: 0 auto; }
+  .week {
+    margin-bottom: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .week.open { border-color: var(--accent-color, var(--blue)); }
+  .week-header {
+    width: 100%;
+    background: rgba(255,255,255,0.02);
+    border: none;
+    cursor: pointer;
+    padding: 13px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    transition: background 0.15s;
+  }
+  .week.open .week-header { background: var(--accent-bg, rgba(96,165,250,0.08)); }
+  .week-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    min-width: 30px;
+    text-align: center;
+    border: 1px solid;
+    flex-shrink: 0;
+  }
+  .week-info { flex: 1; min-width: 0; }
+  .week-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .week-dates {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .week-km { text-align: right; flex-shrink: 0; }
+  .week-km-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .week-km-sub {
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 1px;
+    font-family: 'DM Mono', monospace;
+  }
+  .week-chevron { color: var(--muted); font-size: 12px; margin-left: 4px; flex-shrink: 0; }
+
+  /* WEEK BODY */
+  .week-body { padding: 0 14px 14px; display: none; }
+  .week.open .week-body { display: block; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 12px 0 8px;
+  }
+
+  .session {
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-left: 3px solid var(--s-color, #60a5fa);
+  }
+  .session-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .session-content { flex: 1; min-width: 0; }
+  .session-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .session-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .session-km {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .session-day {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .session-detail {
+    font-size: 12px;
+    color: var(--soft);
+    margin-top: 5px;
+    line-height: 1.55;
+  }
+
+  .mobility-card {
+    background: rgba(124,58,237,0.06);
+    border: 1px solid rgba(124,58,237,0.18);
+    border-left: 3px solid var(--purple2);
+    border-radius: 10px;
+    padding: 9px 12px;
+    margin-bottom: 7px;
+    display: flex;
+    gap: 9px;
+  }
+  .mobility-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .mobility-day {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--purple);
+  }
+  .mobility-detail {
+    font-size: 12px;
+    color: var(--soft);
+    margin-top: 3px;
+    line-height: 1.5;
+  }
+
+  .tip-card {
+    background: rgba(251,191,36,0.05);
+    border: 1px solid rgba(251,191,36,0.18);
+    border-radius: 10px;
+    padding: 9px 12px;
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .tip-text {
+    font-size: 12px;
+    color: #a3a3a3;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* LEGEND TAB */
+  .legend { padding: 20px 16px; max-width: 680px; margin: 0 auto; }
+  .legend-section { margin-bottom: 28px; }
+  .legend-section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--blue);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid rgba(96,165,250,0.18);
+  }
+
+  .allure-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 13px;
+    margin-bottom: 8px;
+  }
+  .allure-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .allure-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .allure-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--yellow);
+    flex-shrink: 0;
+  }
+  .allure-desc { font-size: 12px; color: var(--soft); margin-top: 4px; line-height: 1.55; }
+
+  .mob-type {
+    background: rgba(124,58,237,0.07);
+    border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 10px;
+    padding: 10px 13px;
+    margin-bottom: 8px;
+  }
+  .mob-type-title { font-size: 13px; font-weight: 600; color: var(--purple); }
+  .mob-type-desc { font-size: 12px; color: var(--soft); margin-top: 4px; line-height: 1.55; }
+
+  .cote-row {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: flex-start;
+  }
+  .cote-phase {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--orange);
+    min-width: 100px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .cote-desc { font-size: 12px; color: var(--soft); line-height: 1.5; }
+
+  .race-box {
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 12px;
+    padding: 14px 15px;
+  }
+  .race-row {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: flex-start;
+  }
+  .race-row:last-of-type { border-bottom: none; }
+  .race-km {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    min-width: 65px;
+    flex-shrink: 0;
+  }
+  .race-allure {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--yellow);
+    min-width: 60px;
+    flex-shrink: 0;
+  }
+  .race-conseil { font-size: 12px; color: var(--soft); line-height: 1.5; }
+  .race-target {
+    margin-top: 12px;
+    background: rgba(239,68,68,0.1);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--red);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .rules-list { list-style: none; }
+  .rules-list li {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: flex-start;
+    font-size: 12px;
+    color: var(--soft);
+    line-height: 1.6;
+  }
+  .rules-list li span {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--blue);
+    min-width: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* PROGRESS BAR */
+  .progress-section { padding: 12px 16px 0; max-width: 680px; margin: 0 auto; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .progress-track {
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--blue), var(--yellow), var(--red));
+    border-radius: 2px;
+    width: 0%;
+    transition: width 1s ease;
+  }
+
+  /* BOTTOM NAV safe area */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Plan d'entraînement personnalisé</div>
+  <h1>Semi-Marathon<br>de Vannes</h1>
+  <p class="header-sub">13 septembre 2025 · Objectif <strong>1h57</strong> · 5:30 min/km</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-val">14</div><div class="stat-label">semaines</div></div>
+    <div class="stat"><div class="stat-val">3</div><div class="stat-label">courses/sem</div></div>
+    <div class="stat"><div class="stat-val">~340</div><div class="stat-label">km total</div></div>
+    <div class="stat"><div class="stat-val">2+</div><div class="stat-label">mobilité/sem</div></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('plan', this)">📋 Plan semaine / semaine</button>
+  <button class="tab" onclick="showTab('legend', this)">📖 Légende & conseils</button>
+</div>
+
+<!-- PLAN TAB -->
+<div id="tab-plan">
+  <div class="progress-section">
+    <div class="progress-label"><span>DÉBUT · 3 juin</span><span>COURSE · 13 sept</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="phase-strip">
+    <span class="phase-badge" style="background:rgba(74,222,128,0.12);border:1px solid #4ade80;color:#4ade80">BASE AÉROBIE</span>
+    <span class="phase-badge" style="background:rgba(96,165,250,0.12);border:1px solid #60a5fa;color:#60a5fa">DÉVELOPPEMENT</span>
+    <span class="phase-badge" style="background:rgba(251,191,36,0.12);border:1px solid #fbbf24;color:#fbbf24">SPÉCIFIQUE</span>
+    <span class="phase-badge" style="background:rgba(239,68,68,0.12);border:1px solid #ef4444;color:#ef4444">AFFÛTAGE</span>
+  </div>
+
+  <div class="weeks" id="weeks-container"></div>
+</div>
+
+<!-- LEGEND TAB -->
+<div id="tab-legend" style="display:none">
+  <div class="legend">
+
+    <div class="legend-section">
+      <div class="legend-section-title">Les allures clés</div>
+      <div class="allure-card">
+        <div class="allure-top"><span class="allure-name">🟢 EF — Endurance Fondamentale</span><span class="allure-val">5:45–5:55/km</span></div>
+        <p class="allure-desc">Allure conversationnelle. Cœur à ≤75% FCmax. La majorité du kilométrage.</p>
+      </div>
+      <div class="allure-card">
+        <div class="allure-top"><span class="allure-name">🩷 SEUIL — Seuil lactique doux</span><span class="allure-val">5:10–5:20/km</span></div>
+        <p class="allure-desc">Inconfortable mais tenable. Tu peux dire 2–3 mots. Améliore le seuil lactique.</p>
+      </div>
+      <div class="allure-card">
+        <div class="allure-top"><span class="allure-name">🟠 CÔTES — Force & économie</span><span class="allure-val">effort 7/10</span></div>
+        <p class="allure-desc">Montée dynamique, descente en trot. Développe la puissance sans traumatisme articulaire.</p>
+      </div>
+      <div class="allure-card">
+        <div class="allure-top"><span class="allure-name">🟡 SPÉCI — Allure race</span><span class="allure-val">5:30/km</span></div>
+        <p class="allure-desc">Ton objectif. À toucher progressivement sur des blocs de plus en plus longs.</p>
+      </div>
+      <div class="allure-card">
+        <div class="allure-top"><span class="allure-name">🔵 LS — Sortie longue</span><span class="allure-val">5:45–5:55/km</span></div>
+        <p class="allure-desc">Développe l'endurance fondamentale et les adaptations musculo-tendineuses.</p>
+      </div>
+    </div>
+
+    <div class="legend-section">
+      <div class="legend-section-title">Mobilité matinale</div>
+      <p style="font-size:13px;color:var(--soft);line-height:1.7;margin-bottom:10px">2 séances/semaine le matin · <strong style="color:var(--text)">20–25 min max</strong> · Alterne entre :</p>
+      <div class="mob-type">
+        <div class="mob-type-title">🦵 Mobilité & souplesse</div>
+        <p class="mob-type-desc">Hanches, chevilles, thoracique. Étirements actifs et dynamiques. Yoga flow léger. But : préserver l'amplitude articulaire, éviter les blessures.</p>
+      </div>
+      <div class="mob-type">
+        <div class="mob-type-title">💪 Gainage & renforcement</div>
+        <p class="mob-type-desc">Core (planche, bird dog, dead bug), fessiers (pont, hip thrust), mollets. But : soutenir la foulée, stabiliser le bassin, prévenir genou/IT-band.</p>
+      </div>
+    </div>
+
+    <div class="legend-section">
+      <div class="legend-section-title">Utiliser la pente</div>
+      <div class="cote-row"><span class="cote-phase">Semaines 2–3</span><span class="cote-desc">Côtes courtes 60m — explosivité, technique de bras, poussée</span></div>
+      <div class="cote-row"><span class="cote-phase">Semaines 5–7</span><span class="cote-desc">Côtes longues 2 min — puissance aérobie, force spécifique</span></div>
+      <div class="cote-row" style="border:none"><span class="cote-phase">Semaine 7</span><span class="cote-desc">Côtes + fartlek — variété des intensités, préparation à la course</span></div>
+    </div>
+
+    <div class="legend-section">
+      <div class="legend-section-title">Stratégie de course · 13 septembre</div>
+      <div class="race-box">
+        <div class="race-row"><span class="race-km">0–5 km</span><span class="race-allure">5:40/km</span><span class="race-conseil">Départ contrôlé. Laisse partir la foule. Économie d'énergie.</span></div>
+        <div class="race-row"><span class="race-km">5–16 km</span><span class="race-allure">5:30/km</span><span class="race-conseil">Allure cible. Régulier. Hydratation aux ravitaillements.</span></div>
+        <div class="race-row"><span class="race-km">16–19 km</span><span class="race-allure">5:25–5:30</span><span class="race-conseil">Évalue tes réserves. Si OK, légère accélération.</span></div>
+        <div class="race-row"><span class="race-km">19–21 km</span><span class="race-allure">tout donner</span><span class="race-conseil">Push final. Tu arrives à Vannes, profite !</span></div>
+        <div class="race-target">Objectif : 1h57'00 → 1h58'30</div>
+      </div>
+    </div>
+
+    <div class="legend-section">
+      <div class="legend-section-title">Règles d'or</div>
+      <ul class="rules-list">
+        <li><span>1.</span>Ne saute jamais 2 semaines d'affilée — 1 sem de maladie ? Reprends progressivement.</li>
+        <li><span>2.</span>Si tu te blesses, supprime d'abord la séance de qualité, garde l'EF courte.</li>
+        <li><span>3.</span>La sortie longue est sacrée — c'est la pièce maîtresse de la préparation.</li>
+        <li><span>4.</span>Mange des glucides la veille des sorties longues (riz, pâtes, patate douce).</li>
+        <li><span>5.</span>Dors. Le chantier fatigue autant que l'entraînement — intègre-le dans l'équation.</li>
+        <li><span>6.</span>Teste ton équipement race (chaussures, nutrition, vêtements) en sortie longue.</li>
+        <li><span>7.</span>Zéro fibres et zéro alcool les 3 jours avant la course.</li>
+        <li><span>8.</span>Rien de nouveau le jour J — ni chaussures, ni gel, ni vêtements.</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const WEEKS = [
+  { num:1, phase:"BASE", color:"#4ade80", label:"Mise en route", dates:"3–8 juin", totalKm:22,
+    sessions:[
+      {day:"Mardi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"35 min à 5:45/km — prise de contact, jambes libres", km:6, color:"#4ade80"},
+      {day:"Jeudi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"40 min à 5:45/km — allure confortable, respiration nasale", km:7, color:"#4ade80"},
+      {day:"Dimanche", type:"LS", icon:"🔵", title:"Sortie longue", detail:"50 min à 5:50/km — allure très tranquille, récupération active", km:9, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Lundi matin", detail:"Mobilité hanche & cheville — 20 min : cercles hanches, étirements fléchisseurs, souplesse mollets"},
+      {day:"Mercredi matin", detail:"Gainage & posture course — 20 min : planche, pont fessier, dead bug, superman"},
+    ],
+    tip:"Semaine légère, pas de pression. Établis tes repères de fréquence cardiaque en EF (≤75% FCmax)."
+  },
+  { num:2, phase:"BASE", color:"#4ade80", label:"Construction aérobie", dates:"9–15 juin", totalKm:23,
+    sessions:[
+      {day:"Lundi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"40 min à 5:45/km", km:7, color:"#4ade80"},
+      {day:"Mercredi", type:"CÔTES", icon:"🟠", title:"Côtes courtes", detail:"15 min EF + 6×60m côte (montée dynamique, descente récup trot) + 10 min EF — travail foulée & force", km:6, color:"#fb923c"},
+      {day:"Samedi", type:"LS", icon:"🔵", title:"Sortie longue", detail:"55 min à 5:50/km — terrain plat ou léger", km:10, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Mardi matin", detail:"Mobilité dynamique — 20 min : leg swings, hip circles, épaules, mobilisation thoracique"},
+      {day:"Vendredi matin", detail:"Renforcement bas du corps — 20 min : squats, fentes, mollets debout, équilibre unipodal"},
+    ],
+    tip:"Les côtes développent la puissance sans contraindre les tendons. Concentre-toi sur la poussée du pied et le bras actif."
+  },
+  { num:3, phase:"BASE", color:"#4ade80", label:"Solidifier les fondations", dates:"16–22 juin", totalKm:27,
+    sessions:[
+      {day:"Mardi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"45 min à 5:45/km", km:8, color:"#4ade80"},
+      {day:"Mercredi", type:"SEUIL", icon:"🩷", title:"Intro seuil doux", detail:"10 min EF + 3×5 min à 5:15/km (récup 2 min trot) + 10 min EF — première touche d'allure semi", km:8, color:"#f472b6"},
+      {day:"Dimanche", type:"LS", icon:"🔵", title:"Sortie longue", detail:"60 min à 5:50/km", km:11, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Lundi matin", detail:"Mobilité hanche & rotation — 20 min : pigeon, torsion assise, ouverture de hanche, cactus"},
+      {day:"Vendredi matin", detail:"Gainage & stabilisation — 20 min : planche latérale, bird dog, pont fessier unilatéral"},
+    ],
+    tip:"Le seuil doux à 5:15 = allure où tu peux dire 2-3 mots mais pas tenir une conversation. Ne pas dépasser."
+  },
+  { num:4, phase:"BASE", color:"#4ade80", label:"⚽ Semaine tournoi 7v7", dates:"23–29 juin", totalKm:10,
+    sessions:[
+      {day:"Lundi", type:"EF", icon:"🟢", title:"Endurance légère", detail:"30 min à 5:50/km — récupération active pré-tournoi", km:5, color:"#4ade80"},
+      {day:"Tournoi", type:"TOURNOI", icon:"⚽", title:"7v7 Football", detail:"Participe pleinement — gère l'effort, hydrate-toi", km:0, color:"#a78bfa"},
+      {day:"Dimanche", type:"EF", icon:"🟢", title:"Récupération run", detail:"30 min très calme à 6:00/km si jambes OK, sinon repos", km:5, color:"#4ade80"},
+    ],
+    mobility:[
+      {day:"Mardi matin", detail:"Récupération active — 20 min : étirements statiques doux, rouleau mousse cuisses/mollets"},
+      {day:"Vendredi matin", detail:"Mobilité globale légère — 20 min : yoga flow doux, aucune intensité"},
+    ],
+    tip:"Semaine allégée autour du tournoi. Le foot compte comme charge cardio/musculaire — ne force rien en running."
+  },
+  { num:5, phase:"DÉVELOPPEMENT", color:"#60a5fa", label:"Relance progressive", dates:"30 juin–6 juil", totalKm:27,
+    sessions:[
+      {day:"Lundi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"45 min à 5:45/km — jambes qui reprennent", km:8, color:"#4ade80"},
+      {day:"Mercredi", type:"CÔTES", icon:"🟠", title:"Côtes longues", detail:"15 min EF + 4×2 min côte à bonne allure (récup descente trot) + 10 min EF", km:7, color:"#fb923c"},
+      {day:"Samedi", type:"LS", icon:"🔵", title:"Sortie longue", detail:"65 min à 5:45–5:50/km", km:12, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Mardi matin", detail:"Mobilité hanche & ischio — 20 min : étirement psoas, pigeon, forward fold, calf raise excentrique"},
+      {day:"Vendredi matin", detail:"Renforcement — 20 min : fentes marchées, squat bulgare, gainage, hip thrust"},
+    ],
+    tip:"Retour en force après le tournoi. Les côtes longues (2 min) développent la puissance aérobie spécifique."
+  },
+  { num:6, phase:"DÉVELOPPEMENT", color:"#60a5fa", label:"Allure cible", dates:"7–13 juil", totalKm:30,
+    sessions:[
+      {day:"Mardi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"45 min à 5:45/km", km:8, color:"#4ade80"},
+      {day:"Mercredi", type:"SEUIL", icon:"🩷", title:"Seuil progressif", detail:"10 min EF + 4×5 min à 5:10–5:15/km (récup 90s trot) + 10 min EF", km:9, color:"#f472b6"},
+      {day:"Dimanche", type:"LS", icon:"🔵", title:"Sortie longue avec allure", detail:"70 min : 50 min EF + 15 min à 5:30/km (allure cible) + 5 min EF", km:13, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Lundi matin", detail:"Mobilité complète — 25 min : cheville, hanche, thoracique, épaules"},
+      {day:"Vendredi matin", detail:"Gainage dynamique — 25 min : mountain climbers lents, dead bug, planche avec bascule"},
+    ],
+    tip:"Premier vrai contact avec le 5:30/km en fin de sortie longue. C'est une sensation, pas une obligation de chrono."
+  },
+  { num:7, phase:"DÉVELOPPEMENT", color:"#60a5fa", label:"Volume peak", dates:"14–20 juil", totalKm:32,
+    sessions:[
+      {day:"Lundi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"50 min à 5:45/km", km:9, color:"#4ade80"},
+      {day:"Mercredi", type:"CÔTES", icon:"🟠", title:"Côtes + fartlek", detail:"10 min EF + 5×2 min côte + 15 min fartlek libre (variations 5:30–5:00) + 10 min EF", km:9, color:"#fb923c"},
+      {day:"Samedi", type:"LS", icon:"🔵", title:"Sortie longue", detail:"75 min à 5:45/km — sortie la plus longue du plan", km:14, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Mardi matin", detail:"Renforcement intense — 25 min : squat sauté, fentes explosives, mollets lestés, gainage"},
+      {day:"Vendredi matin", detail:"Mobilité & récupération — 25 min : rouleau, étirements, respiration diaphragmatique"},
+    ],
+    tip:"Semaine la plus chargée. La sortie longue de 75 min construit ta confiance mentale autant que physique."
+  },
+  { num:8, phase:"DÉVELOPPEMENT", color:"#60a5fa", label:"Consolidation", dates:"21–27 juil", totalKm:31,
+    sessions:[
+      {day:"Mardi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"45 min à 5:45/km", km:8, color:"#4ade80"},
+      {day:"Mercredi", type:"SEUIL", icon:"🩷", title:"Seuil étendu", detail:"10 min EF + 2×10 min à 5:15/km (récup 3 min trot) + 10 min EF", km:10, color:"#f472b6"},
+      {day:"Dimanche", type:"LS", icon:"🔵", title:"Sortie longue avec blocs allure", detail:"70 min : 40 min EF + 2×10 min à 5:30/km (récup 5 min EF)", km:13, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Lundi matin", detail:"Mobilité hanche & bassin — 25 min : mobilisations profondes, étirements fléchisseurs"},
+      {day:"Vendredi matin", detail:"Gainage + équilibre — 25 min : planche, équilibre unipodal, proprioception"},
+    ],
+    tip:"Les 2×10 min de seuil simulent la fatigue accumulée en course. C'est l'exercice le plus spécifique du plan."
+  },
+  { num:9, phase:"SPÉCIFIQUE", color:"#fbbf24", label:"Simulation race", dates:"28 juil–3 août", totalKm:33,
+    sessions:[
+      {day:"Lundi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"45 min à 5:45/km", km:8, color:"#4ade80"},
+      {day:"Mercredi", type:"SPÉCI", icon:"🟡", title:"Séance spécifique", detail:"10 min EF + 20 min à 5:30/km + 5 min récup + 10 min à 5:30 + 10 min EF", km:11, color:"#fbbf24"},
+      {day:"Samedi", type:"LS", icon:"🔵", title:"Sortie longue semi-spécifique", detail:"75 min : 30 min EF + 30 min à 5:30/km + 15 min EF", km:14, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Mardi matin", detail:"Mobilité dynamique complète — 25 min : échauffement type course, ABCs running"},
+      {day:"Vendredi matin", detail:"Renforcement léger — 20 min : activation fessiers, gainage, mobilité"},
+    ],
+    tip:"20+10 min à allure cible = 30 min de travail race-pace. Tu verras comment ton corps gère l'allure en fatigue."
+  },
+  { num:10, phase:"SPÉCIFIQUE", color:"#fbbf24", label:"Charge spécifique", dates:"4–10 août", totalKm:31,
+    sessions:[
+      {day:"Mardi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"45 min à 5:45/km", km:8, color:"#4ade80"},
+      {day:"Mercredi", type:"SPÉCI", icon:"🟡", title:"Allure semi prolongée", detail:"10 min EF + 35 min à 5:30/km + 10 min EF", km:10, color:"#fbbf24"},
+      {day:"Dimanche", type:"LS", icon:"🔵", title:"Sortie longue", detail:"70 min à 5:40/km — légère accélération finale 10 min à 5:30", km:13, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Lundi matin", detail:"Mobilité & activation — 25 min : routine dynamique pré-course, ABCs, skipping"},
+      {day:"Vendredi matin", detail:"Gainage profond — 20 min : core stabilité, respiration, anti-rotation"},
+    ],
+    tip:"35 min à allure race = ~6 km à 5:30. C'est un tiers de la distance. La confiance grandit ici."
+  },
+  { num:11, phase:"SPÉCIFIQUE", color:"#fbbf24", label:"Peak spécifique", dates:"11–17 août", totalKm:31,
+    sessions:[
+      {day:"Lundi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"40 min à 5:45/km", km:7, color:"#4ade80"},
+      {day:"Mercredi", type:"SPÉCI", icon:"🟡", title:"Séance race-pace longue", detail:"10 min EF + 45 min à 5:30/km + 10 min EF — ta plus longue séance spécifique", km:12, color:"#fbbf24"},
+      {day:"Samedi", type:"LS", icon:"🔵", title:"Sortie longue récupération", detail:"65 min à 5:50/km — tranquille, sur terrain agréable", km:12, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Mardi matin", detail:"Récupération active — 20 min : étirements doux, rouleau, respiration"},
+      {day:"Vendredi matin", detail:"Activation musculaire — 20 min : fessiers, ischio, mollets, stabilisation"},
+    ],
+    tip:"45 min à 5:30 = ~8 km à allure cible. Si tu gères ça, tu es prêt pour le semi. Gère la fin sans paniquer."
+  },
+  { num:12, phase:"AFFÛTAGE", color:"#ef4444", label:"Réduction volume", dates:"18–24 août", totalKm:24,
+    sessions:[
+      {day:"Mardi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"35 min à 5:45/km", km:6, color:"#4ade80"},
+      {day:"Mercredi", type:"SPÉCI", icon:"🟡", title:"Maintien allure", detail:"10 min EF + 25 min à 5:30/km + 10 min EF", km:8, color:"#fbbf24"},
+      {day:"Dimanche", type:"LS", icon:"🔵", title:"Sortie longue réduite", detail:"55 min à 5:45/km — jambes fraîches priorité", km:10, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Lundi matin", detail:"Mobilité globale — 20 min : routine habituelle, pas de nouveauté"},
+      {day:"Vendredi matin", detail:"Activation légère — 15 min : gainage, fessiers, mollets"},
+    ],
+    tip:"On baisse le volume (-25%) mais on maintient l'intensité. Les jambes commencent à emmagasiner l'énergie."
+  },
+  { num:13, phase:"AFFÛTAGE", color:"#ef4444", label:"Légèreté", dates:"25–31 août", totalKm:19,
+    sessions:[
+      {day:"Lundi", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"30 min à 5:45/km", km:5, color:"#4ade80"},
+      {day:"Mercredi", type:"SPÉCI", icon:"🟡", title:"Rappel allure", detail:"10 min EF + 15 min à 5:30/km + 5 min EF — juste rappeler les sensations", km:6, color:"#fbbf24"},
+      {day:"Samedi", type:"LS", icon:"🔵", title:"Sortie courte active", detail:"45 min à 5:50/km — plaisir, légèreté", km:8, color:"#60a5fa"},
+    ],
+    mobility:[
+      {day:"Mardi matin", detail:"Mobilité douce — 15 min : tout ce qui fait du bien, rien d'intense"},
+      {day:"Vendredi matin", detail:"Activation pré-affûtage — 15 min : gammes running, coordination"},
+    ],
+    tip:"Tu te sens peut-être trop reposé. C'est normal et voulu. La forme monte sous la surface."
+  },
+  { num:14, phase:"AFFÛTAGE", color:"#ef4444", label:"Semaine de course 🏁", dates:"1–13 sept", totalKm:33,
+    sessions:[
+      {day:"Lundi 1er", type:"EF", icon:"🟢", title:"Endurance fondamentale", detail:"25 min à 5:45/km — dernière sortie normale", km:4, color:"#4ade80"},
+      {day:"Mercredi 3", type:"SPÉCI", icon:"🟡", title:"Petite activation", detail:"15 min EF + 3×3 min à 5:30/km + 10 min EF — réveiller les jambes", km:5, color:"#fbbf24"},
+      {day:"Vendredi 5", type:"EF", icon:"🟢", title:"Footing très léger", detail:"20 min à 6:00/km — juste se lever et bouger", km:3, color:"#4ade80"},
+      {day:"🏁 Sam 13", type:"RACE", icon:"🏁", title:"SEMI-MARATHON DE VANNES", detail:"21,097 km à 5:30/km → objectif 1h57–1h58 ! Départ tranquille 5:40 les 5 premiers km, gère à 5:30 jusqu'au 18e, puis lâche tout.", km:21, color:"#ef4444"},
+    ],
+    mobility:[
+      {day:"Mardi matin", detail:"Mobilité légère — 15 min : routine douce, pas de fatigue"},
+      {day:"Jeudi matin", detail:"Activation pré-race — 15 min : gammes, talons-fesses, genoux hauts, étirements actifs"},
+    ],
+    tip:"Couche-toi tôt vendredi. Mange des glucides jeudi et vendredi soir. Prépare ton sac la veille. Fais confiance au travail accompli."
+  },
+];
+
+const PHASE_BG = {
+  BASE: { bg:"rgba(74,222,128,0.08)", border:"#4ade80" },
+  DÉVELOPPEMENT: { bg:"rgba(96,165,250,0.08)", border:"#60a5fa" },
+  SPÉCIFIQUE: { bg:"rgba(251,191,36,0.08)", border:"#fbbf24" },
+  AFFÛTAGE: { bg:"rgba(239,68,68,0.08)", border:"#ef4444" },
+};
+
+function buildWeeks() {
+  const container = document.getElementById('weeks-container');
+  WEEKS.forEach(week => {
+    const ph = PHASE_BG[week.phase];
+    const div = document.createElement('div');
+    div.className = 'week';
+    div.id = `week-${week.num}`;
+    div.style.setProperty('--accent-color', ph.border);
+    div.style.setProperty('--accent-bg', ph.bg);
+    div.style.borderLeft = `3px solid ${ph.border}`;
+
+    const sessHTML = week.sessions.map(s => `
+      <div class="session" style="--s-color:${s.color}">
+        <div class="session-icon">${s.icon}</div>
+        <div class="session-content">
+          <div class="session-top">
+            <span class="session-title">${s.title}</span>
+            ${s.km > 0 ? `<span class="session-km" style="color:${s.color}">~${s.km} km</span>` : ''}
+          </div>
+          <div class="session-day">${s.day}</div>
+          <div class="session-detail">${s.detail}</div>
+        </div>
+      </div>`).join('');
+
+    const mobHTML = week.mobility.map(m => `
+      <div class="mobility-card">
+        <div class="mobility-icon">🧘</div>
+        <div>
+          <div class="mobility-day">${m.day}</div>
+          <div class="mobility-detail">${m.detail}</div>
+        </div>
+      </div>`).join('');
+
+    div.innerHTML = `
+      <button class="week-header" onclick="toggleWeek(${week.num})">
+        <span class="week-num" style="color:${ph.border};border-color:${ph.border}">S${week.num}</span>
+        <div class="week-info">
+          <div class="week-title">${week.label}</div>
+          <div class="week-dates">${week.dates}</div>
+        </div>
+        <div class="week-km">
+          <div class="week-km-val" style="color:${ph.border}">${week.totalKm} km</div>
+          <div class="week-km-sub">${week.sessions.length} run · 2 mob</div>
+        </div>
+        <span class="week-chevron" id="chev-${week.num}">▼</span>
+      </button>
+      <div class="week-body">
+        <div class="section-label">Séances de course</div>
+        ${sessHTML}
+        <div class="section-label">Mobilité & Renforcement (matin)</div>
+        ${mobHTML}
+        <div class="tip-card">
+          <span>💡</span>
+          <div class="tip-text">${week.tip}</div>
+        </div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function toggleWeek(num) {
+  const el = document.getElementById(`week-${num}`);
+  const chev = document.getElementById(`chev-${num}`);
+  const isOpen = el.classList.contains('open');
+  el.classList.toggle('open', !isOpen);
+  chev.textContent = isOpen ? '▼' : '▲';
+}
+
+function showTab(name, btn) {
+  document.getElementById('tab-plan').style.display = name === 'plan' ? 'block' : 'none';
+  document.getElementById('tab-legend').style.display = name === 'legend' ? 'block' : 'none';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Progress bar
+function updateProgress() {
+  const start = new Date('2025-06-03');
+  const end = new Date('2025-09-13');
+  const now = new Date();
+  const pct = Math.min(100, Math.max(0, (now - start) / (end - start) * 100));
+  setTimeout(() => {
+    document.getElementById('progress-fill').style.width = pct + '%';
+  }, 300);
+}
+
+buildWeeks();
+updateProgress();
+</script>
+</body>
+</html>
